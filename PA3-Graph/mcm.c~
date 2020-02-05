@@ -1,0 +1,143 @@
+#include "mcm.h"
+#include <limits.h>
+
+ver* get_graph(ver* vertexs, FILE* fp){
+	int source;
+	int dest;
+	float dist;
+	while(!feof(fp)){
+		fscanf(fp, "%d %d %f\n",&dest, &source, &dist);
+		vertexs[source].distance[dest]  = dist;
+		vertexs[source].destination[dest] = 1;
+		//	printf("%d %f\n",dest, dist);
+	}
+	return vertexs;
+}
+
+void construct(ver* vertexs, int** route, float** dist,int edges, int source){
+	if(edges >= sizeof(vertexs)){
+		return;
+	}
+	/*for(int b = 0; b < sizeof(vertexs); b++){
+		dist[edges][b] = INT_MAX;
+		route[edges][b] = -1;
+	}*/
+	for(int i = 1; i < sizeof(vertexs[source].destination); i++){
+		if(vertexs[source].destination[i] == 1){
+			//printf("%d\n", i);
+			if(route[edges][i] != -1){
+				float compare;
+				if(dist[edges - 1][route[edges][i]] == INT_MAX){
+					compare = vertexs[source].distance[i];
+				}
+				else{
+					compare = dist[edges - 1][route[edges][i]] + vertexs[source].distance[i];
+				}
+				if(compare >= dist[edges][i]){
+					return;
+				}
+			}
+			route[edges][i] = source;
+			if(dist[edges - 1][route[edges][i]] == INT_MAX || dist[edges - 1][route[edges][i]] == 0){
+				dist[edges][i] = vertexs[source].distance[i];
+			}
+			else{
+				dist[edges][i] = dist[edges - 1][route[edges][i]] + vertexs[source].distance[i];
+			}
+			construct(vertexs, route, dist, edges + 1, i);
+		}
+	}	
+
+}
+void create_table(ver* vertexs, int** route, float** dist){
+	/*for(int j = 0; j < sizeof(vertexs); j++){
+		dist[edges][j] = INT_MAX;
+		route[edges][j] = -1;
+	 }*/
+//	printf("!!!!!!!!\n");   PASS
+	dist[0][1] = 0;
+	construct(vertexs, route, dist,1, 1);
+	return;
+}
+
+float mcm(float** dist, int* table){
+	float mcm = INT_MAX;
+	float* mcm_arr = malloc(sizeof(float) * sizeof(dist[0]));
+	for(int i = 0; i < sizeof(dist[0]); i++){
+		mcm_arr[i] = INT_MAX;
+	}
+	for(int j = 1; j < sizeof(dist[0]); j++){
+			float diff = INT_MIN;
+			float top = INT_MAX;
+			int index = 0;
+			for(int i = sizeof(dist)  - 1; i >= 0;i--){
+	//			printf("%f !!!!!!!\n", dist[i][j]);
+				if(dist[i][j] != INT_MAX){
+					top = dist[i][j];
+					index = i;
+					break;
+				}
+			}
+			for(int i = index - 1; i >= 0; i--){
+				if(dist[i][j] != INT_MAX){
+					float temp = (top - dist[i][j]) / (index - i);
+	//				printf("here");
+					if(diff < temp){
+						diff = temp;
+					}
+				}
+			}
+			if(diff != INT_MIN){
+				mcm_arr[j] = diff;
+			}
+	}
+	for(int i = 1; i < sizeof(dist[0]); i++){
+//			printf("%f fengle \n ",mcm_arr[i]);
+			if(mcm_arr[i] <  mcm){
+			//	printf("%f i\ni", mcm_arr[i]);
+				mcm = mcm_arr[i];
+				table[0] = i;
+			}
+	}
+	free(mcm_arr);
+	return mcm;
+}
+
+/*void get_route(int** route, int* table, float mcm, int* answer){
+	int j = table[0];
+//	int index = 0;
+	int counter = 1;
+	answer[0] = table[0];
+	int i = sizeof(route) - 1;
+	while(route[i][j] != table[0]){
+		printf("%d \n", route[i][j]);
+		answer[counter] = route[i][j];
+		counter++;
+		i = i - 1;
+		j = route[i][j];
+	}
+	return;
+}*/
+/*void get_mcm(ver* vertexs, int i, int edges, int* check_arrived, float* dist, int* route, int count){
+	int temp = i;
+	for(int j = 1; j < sizeof(vertexs[i].destination);j++){
+		if(vertexs[i].destination[j] == 1){
+			if(check_arrived[j] == 1){
+				dist[temp] +=vertexs[i].distance[j];
+				//		printf("final %f\n",dist[temp]);
+				route[count] = j;
+				return;
+			}
+			check_arrived[j] = 1;
+			route[count] = j;
+			count++;
+			edges++;
+			//	printf("check temp%d", temp);
+			dist[temp] +=vertexs[i].distance[j];
+			//	printf("%f !!!\n", dist[temp]);
+			i = j;
+			j = 0;
+		}
+	}
+	return;
+}*/

@@ -1,0 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <stdbool.h>
+typedef struct _ver{
+	float* distance;
+        int* destination;
+}ver;
+
+
+ver* get_graph(ver* graph, FILE* fp);
+void get_mcm(ver* vertexs, int i, int edges, int* check_arrived, float* dist, int* route,int count);
+void create_table(ver* vertexs, int** route, float** dist);
+void construct(ver* vertexs, int** route, float** dist, int edges, int source);
+float mcm(float** dist, int* table);
+void get_route(int** route, int* table, float mcm, int* answer);

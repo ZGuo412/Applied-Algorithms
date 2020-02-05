@@ -1,0 +1,47 @@
+#include "mcm.h"
+#include <limits.h>
+
+
+int main(int argc, char** argv){
+	if(argc != 2){
+		return EXIT_FAILURE;
+	}
+	char* input_file = argv[1];
+	FILE* fp = fopen(input_file, "r");
+	int num_v;
+	int num_e;
+	fscanf(fp, "V %d\n", &num_v);
+	fscanf(fp, "E %d\n", &num_e);
+	ver* vertexs = malloc(sizeof(*vertexs) * (num_v + 1));
+	for(int i = 0; i < num_v + 1; i++){
+	  // vertexs[i].num = -1;
+	  vertexs[i].distance = malloc(sizeof(int) * (num_v + 1));
+	  vertexs[i].destination = malloc(sizeof(int) * (num_v + 1));
+	}
+	vertexs = get_graph(vertexs, fp);
+	int** route = (int **)malloc(sizeof(int*) * (num_v + 1));
+	float** dist = (float **)malloc(sizeof(int*) * (num_v + 1));
+	for(int i = 0; i < (num_v + 1); i++){
+	  //printf("%d %d", i, num_v);
+	  route[i] = (int*)malloc(sizeof(int) * sizeof(vertexs));
+	  dist[i] = (float*)malloc(sizeof(float) * sizeof(vertexs));
+	  //printf("%ld \n", sizeof(vertexs));
+	}
+	for(int i = 0; i < (num_v + 1); i++){
+		for(int j = 0; j < sizeof(vertexs); j++){
+			route[i][j] = -1;
+			dist[i][j] = INT_MAX;
+		}
+	}
+	create_table(vertexs, route, dist);
+/*	for(int i = 0; i < (num_v + 1);i++){
+		for(int j = 0; j < sizeof(vertexs); j++){
+			printf(" %d aaaaaa  %f ", route[i][j], dist[i][j]);
+		}
+		printf("\n");
+	}
+*/
+	int* table = malloc(sizeof(int));
+	float v_mcm = mcm(dist, table);
+	printf("%f  %d\n", v_mcm, table[0]);
+}
